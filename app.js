@@ -10,6 +10,19 @@ const gameRouter = require('./routes/gameRouter');
 const decorRouter = require('./routes/decorRouter');
 const treatRouter = require('./routes/treatRouter');
 
+const mongoose = require('mongoose');
+
+const url = 'mongodb://localhost:27017/boardgamesite';
+const connect = mongoose.connect(url, {
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useNewUrlParser: true, 
+    useUnifiedTopology: true
+});
+
+connect.then(() => console.log('Connected correctly to server'), 
+    err => console.log(err)
+);
 
 var app = express();
 
