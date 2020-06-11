@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const Treat = require('../models/treat');
+const authenticate = require('../authenticate');
 
 const treatRouter = express.Router();
 
@@ -17,7 +18,7 @@ treatRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Treat.create(req.body)
     .then(treat => {
         console.log('Treat Created ', treat);
@@ -27,11 +28,11 @@ treatRouter.route('/')
     })
     .catch(err => next(err));
 })
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /treats');
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Treat.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -52,11 +53,11 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.post((req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /treats/${req.params.treatId}`);
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     Treat.findByIdAndUpdate(req.params.treatId, {
         $set: req.body
     }, { new: true })
@@ -67,7 +68,7 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Treat.findByIdAndDelete(req.params.treatId)
     .then(response => {
         res.statusCode = 200;
@@ -76,50 +77,5 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 });
-
-
-// Before Weekly Assignment
-// treatRouter.route('/')
-// .all((req, res, next) => {
-//     res.statusCode = 200;
-//     res.setHeader('Content-Type', 'text/plain');
-//     next();
-// })
-// .get((req, res) => {
-//     res.end('Will send all the treats to you');
-// })
-// .post((req, res) => {
-//     res.end(`Will add the treat: ${req.body.name} with description: ${req.body.description}`);
-// })
-// .put((req, res) => {
-//     res.statusCode = 403;
-//     res.end('PUT operation not supported on /treats');
-// })
-// .delete((req, res) => {
-//     res.end('Deleting all treats');
-// });
-
-// // route 
-// treatRouter.route('/:treatId')
-// .all((req, res, next) => {
-//     res.statusCode = 200;
-//     res.setHeader('Content-Type', 'text/plain');
-//     next();
-// })
-// .get((req, res) => {
-//     res.end(`Will send details of the treat: ${req.params.treatId} to you`);
-// })
-// .post((req, res) => {
-//     res.statusCode = 403;
-//     res.end(`POST operation not supported on /treats/${req.params.treatId}`);
-// })
-// .put((req, res) => {
-//     res.write(`Updating the treat: ${req.params.treatId}\n`);
-//     res.end(`Will update the treat: ${req.body.name}
-//         with description ${req.body.description}`);
-// })
-// .delete((req, res) => {
-//     res.end(`Deleting treat: ${req.params.treatId}`);
-// });
 
 module.exports = treatRouter;
