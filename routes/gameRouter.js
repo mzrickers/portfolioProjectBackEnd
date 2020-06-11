@@ -12,6 +12,7 @@ gameRouter.use(bodyParser.json());
 gameRouter.route('/')
 .get((req, res, next) => {
     Game.find()
+    .populate('comments.author')
     .then(games => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -47,6 +48,7 @@ gameRouter.route('/')
 gameRouter.route('/:gameId')
 .get((req, res, next) => {
     Game.findById(req.params.gameId)
+    .populate('comments.author')
     .then(game => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -83,6 +85,7 @@ gameRouter.route('/:gameId')
 gameRouter.route('/:gameId/comments')
 .get((req, res, next) => {
     Game.findById(req.params.gameId)
+    .populate('comments.author')
     .then(game => {
         if (game) {
             res.statusCode = 200;
@@ -100,6 +103,7 @@ gameRouter.route('/:gameId/comments')
     Game.findById(req.params.gameId)
     .then(game => {
         if (game) {
+            req.body.author = req.user._id;
             game.comments.push(req.body);
             game.save()
             .then(game => {
@@ -147,6 +151,7 @@ gameRouter.route('/:gameId/comments')
 gameRouter.route('/:gameId/comments/:commentId')
 .get((req, res, next) => {
     Game.findById(req.params.gameId)
+    .populate('comments.author')
     .then(game => {
         if (game && game.comments.id(req.params.commentId)) {
             res.statusCode = 200;
