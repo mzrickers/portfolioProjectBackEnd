@@ -20,7 +20,7 @@ gameRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Game.create(req.body)
     .then(game => {
         console.log('Game Created ', game);
@@ -34,7 +34,7 @@ gameRouter.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /games');
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Game.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -60,7 +60,7 @@ gameRouter.route('/:gameId')
     res.statusCode = 403;
     res.end(`POST operation not supported on /games/${req.params.gameId}`);
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Game.findByIdAndUpdate(req.params.gameId, {
         $set: req.body
     }, { new: true })
@@ -71,7 +71,7 @@ gameRouter.route('/:gameId')
     })
     .catch(err => next(err));
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Game.findByIdAndDelete(req.params.gameId)
     .then(response => {
         res.statusCode = 200;
@@ -124,7 +124,7 @@ gameRouter.route('/:gameId/comments')
     res.statusCode = 403;
     res.end(`PUT operation not supported on /games/${req.params.gameId}/comments`);
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Game.findById(req.params.gameId)
     .then(game => {
         if (game) {

@@ -18,7 +18,7 @@ treatRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.create(req.body)
     .then(treat => {
         console.log('Treat Created ', treat);
@@ -32,7 +32,7 @@ treatRouter.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /treats');
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -53,7 +53,7 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /treats/${req.params.treatId}`);
 })
@@ -68,7 +68,7 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.findByIdAndDelete(req.params.treatId)
     .then(response => {
         res.statusCode = 200;

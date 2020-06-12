@@ -18,7 +18,7 @@ decorRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.create(req.body)
     .then(decor => {
         console.log('Decor Created ', decor);
@@ -32,7 +32,7 @@ decorRouter.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /decors');
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -57,7 +57,7 @@ decorRouter.route('/:decorId')
     res.statusCode = 403;
     res.end(`POST operation not supported on /decors/${req.params.decorId}`);
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.findByIdAndUpdate(req.params.decorId, {
         $set: req.body
     }, { new: true })
@@ -68,7 +68,7 @@ decorRouter.route('/:decorId')
     })
     .catch(err => next(err));
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.findByIdAndDelete(req.params.decorId)
     .then(response => {
         res.statusCode = 200;
