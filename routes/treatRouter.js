@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Treat = require('../models/treat');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const treatRouter = express.Router();
 
@@ -9,7 +10,8 @@ treatRouter.use(bodyParser.json());
 
 //Used to Create, Read, or Delete a treat
 treatRouter.route('/')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Treat.find()
     .then(treats => {
         res.statusCode = 200;
@@ -18,7 +20,7 @@ treatRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.create(req.body)
     .then(treat => {
         console.log('Treat Created ', treat);
@@ -28,7 +30,7 @@ treatRouter.route('/')
     })
     .catch(err => next(err));
 })
-.put(authenticate.verifyUser, (req, res) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /treats');
 })
@@ -44,7 +46,8 @@ treatRouter.route('/')
 
 //Used to Read, Update, or Delete a specific treat
 treatRouter.route('/:treatId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Treat.findById(req.params.treatId)
     .then(treat => {
         res.statusCode = 200;
@@ -53,11 +56,11 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /treats/${req.params.treatId}`);
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.findByIdAndUpdate(req.params.treatId, {
         $set: req.body
     }, { new: true })
@@ -68,7 +71,7 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.findByIdAndDelete(req.params.treatId)
     .then(response => {
         res.statusCode = 200;

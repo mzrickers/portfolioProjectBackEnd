@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Game = require('../models/game');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const gameRouter = express.Router();
 
@@ -10,7 +11,8 @@ gameRouter.use(bodyParser.json());
 
 //Used to Create, Read, or Delete a game
 gameRouter.route('/')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Game.find()
     .populate('comments.author')
     .then(games => {
@@ -46,7 +48,8 @@ gameRouter.route('/')
 
 //Used to Read, Update, or Delete a specific game
 gameRouter.route('/:gameId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Game.findById(req.params.gameId)
     .populate('comments.author')
     .then(game => {
@@ -83,7 +86,8 @@ gameRouter.route('/:gameId')
 
 // Used to Create, Read, or Delete comments from a specific game
 gameRouter.route('/:gameId/comments')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Game.findById(req.params.gameId)
     .populate('comments.author')
     .then(game => {
@@ -99,7 +103,7 @@ gameRouter.route('/:gameId/comments')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Game.findById(req.params.gameId)
     .then(game => {
         if (game) {
@@ -120,11 +124,11 @@ gameRouter.route('/:gameId/comments')
     })
     .catch(err => next(err));
 })
-.put(authenticate.verifyUser, (req, res) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`PUT operation not supported on /games/${req.params.gameId}/comments`);
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Game.findById(req.params.gameId)
     .then(game => {
         if (game) {
@@ -148,7 +152,8 @@ gameRouter.route('/:gameId/comments')
 });
 
 gameRouter.route('/:gameId/comments/:commentId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Game.findById(req.params.gameId)
     .populate('comments.author')
     .then(game => {
@@ -168,11 +173,11 @@ gameRouter.route('/:gameId/comments/:commentId')
     })
     .catch(err => next(err));
  })
-.post(authenticate.verifyUser, (req, res) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /games/${req.params.gameId}/comments/${req.params.commentId}`);
 })
-.put(authenticate.verifyUser, (req, res, next) => 
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => 
 {
     Game.findById(req.params.gameId)
     .then(game => 
@@ -213,7 +218,7 @@ gameRouter.route('/:gameId/comments/:commentId')
     })
     .catch(err => next(err));
  })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Game.findById(req.params.gameId)
     .then(game => 
     {

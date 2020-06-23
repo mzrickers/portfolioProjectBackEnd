@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Decor = require('../models/decor');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const decorRouter = express.Router();
 
@@ -9,7 +10,8 @@ decorRouter.use(bodyParser.json());
 
 //Used to Create, Read, or Delete a decor
 decorRouter.route('/')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Decor.find()
     .then(decors => {
         res.statusCode = 200;
@@ -18,7 +20,7 @@ decorRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.create(req.body)
     .then(decor => {
         console.log('Decor Created ', decor);
@@ -28,11 +30,11 @@ decorRouter.route('/')
     })
     .catch(err => next(err));
 })
-.put(authenticate.verifyUser, (req, res) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /decors');
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -44,7 +46,8 @@ decorRouter.route('/')
 
 //Used to Read, Update, or Delete a specific decor
 decorRouter.route('/:decorId')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
     Decor.findById(req.params.decorId)
     .then(decor => {
         res.statusCode = 200;
@@ -53,11 +56,11 @@ decorRouter.route('/:decorId')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /decors/${req.params.decorId}`);
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.findByIdAndUpdate(req.params.decorId, {
         $set: req.body
     }, { new: true })
@@ -68,7 +71,7 @@ decorRouter.route('/:decorId')
     })
     .catch(err => next(err));
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Decor.findByIdAndDelete(req.params.decorId)
     .then(response => {
         res.statusCode = 200;
