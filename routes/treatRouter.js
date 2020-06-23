@@ -53,11 +53,11 @@ treatRouter.route('/:treatId')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /treats/${req.params.treatId}`);
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Treat.findByIdAndUpdate(req.params.treatId, {
         $set: req.body
     }, { new: true })
