@@ -147,7 +147,6 @@ gameRouter.route('/:gameId/comments')
     .catch(err => next(err));
 });
 
-// Used to Read, Update or Delete a specific comment
 gameRouter.route('/:gameId/comments/:commentId')
 .get((req, res, next) => {
     Game.findById(req.params.gameId)
@@ -160,7 +159,7 @@ gameRouter.route('/:gameId/comments/:commentId')
         } else if (!game) {
             err = new Error(`Game ${req.params.gameId} not found`);
             err.status = 404;
-            return next(err);
+            return next(err);    
         } else {
             err = new Error(`Comment ${req.params.commentId} not found`);
             err.status = 404;
@@ -168,19 +167,26 @@ gameRouter.route('/:gameId/comments/:commentId')
         }
     })
     .catch(err => next(err));
-})
+ })
 .post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /games/${req.params.gameId}/comments/${req.params.commentId}`);
 })
-.put(authenticate.verifyUser, (req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => 
+{
     Game.findById(req.params.gameId)
-    .then(game => {
-        if (game && game.comments.id(req.params.commentId)) {
-            if (req.body.rating) {
+    .then(game => 
+    {
+        if (game && game.comments.id(req.params.commentId)) 
+        {
+        if (game.comments.id(req.params.commentId).author._id.equals(req.user._id))
+        { 
+            if (req.body.rating) 
+            {
                 game.comments.id(req.params.commentId).rating = req.body.rating;
             }
-            if (req.body.text) {
+            if (req.body.text) 
+            {
                 game.comments.id(req.params.commentId).text = req.body.text;
             }
             game.save()
@@ -190,10 +196,15 @@ gameRouter.route('/:gameId/comments/:commentId')
                 res.json(game);
             })
             .catch(err => next(err));
+        } else {
+            const err = new Error('You are not authorized!');
+            err.status = 403;
+            return next(err);
+        }
         } else if (!game) {
             err = new Error(`Game ${req.params.gameId} not found`);
             err.status = 404;
-            return next(err);
+            return next(err);    
         } else {
             err = new Error(`Comment ${req.params.commentId} not found`);
             err.status = 404;
@@ -201,23 +212,33 @@ gameRouter.route('/:gameId/comments/:commentId')
         }
     })
     .catch(err => next(err));
-})
+ })
 .delete(authenticate.verifyUser, (req, res, next) => {
     Game.findById(req.params.gameId)
-    .then(game => {
-        if (game && game.comments.id(req.params.commentId)) {
-            game.comments.id(req.params.commentId).remove();
-            game.save()
-            .then(game => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(game);
-            })
-            .catch(err => next(err));
+    .then(game => 
+    {
+        if (game && game.comments.id(req.params.commentId)) 
+        {
+            const authorId = game.comments.id(req.params.commentId).author._id;
+            if (authorId.equals(req.user._id))
+            {
+                game.comments.id(req.params.commentId).remove();
+                game.save()
+                .then(game => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(game);
+                })
+                .catch(err => next(err));
+            } else {
+                const err = new Error('You are not authorized');
+                err.status = 403;
+                return next(err);
+            }
         } else if (!game) {
             err = new Error(`Game ${req.params.gameId} not found`);
             err.status = 404;
-            return next(err);
+            return next(err);    
         } else {
             err = new Error(`Comment ${req.params.commentId} not found`);
             err.status = 404;
@@ -225,6 +246,6 @@ gameRouter.route('/:gameId/comments/:commentId')
         }
     })
     .catch(err => next(err));
-});
+ });
 
 module.exports = gameRouter;
